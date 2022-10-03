@@ -1,17 +1,95 @@
-import React, { useState } from "react";
-import { View, TextInput, Text, TouchableOpacity, Alert, ImageBackground, Switch, ScrollView } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, TextInput, Text, TouchableOpacity, Alert, ImageBackground, Switch, ScrollView, AsyncStorage, NativeModules } from "react-native";
 import styles from './Styles/StyleCadastro';
 import LinearGradient from "react-native-linear-gradient";
 import CheckBox, { CheckCircle } from "./Index";
+import SQLite from 'react-native-sqlite-storage';
 
-export function CadastroScreen({ navigation }) {
+
+export default function CadastroScreen({ navigation }) {
+  
+  const db = SQLite.openDatabase(
+    {
+      name: 'MainDB',
+      location: 'default',
+    },
+    () => { },
+    error => { console.log(error) }
+  );
 
   const [nome, setNome] = useState('')
   const [sobrenome, setSobrenome] = useState('')
   const [telefone, setTelefone] = useState('')
   const [whatsApp, setWhatsApp] = useState('')
   const [email, setEmail] = useState('')
+  const [diasEntrega, setDiasEntrega] = useState([])
+  const [contato, setContato] = useState('')
+  const [tipoEstabelecimento, setTipoEstabelecimento] = useState('')
   const [isEnable, setIsEnable] = useState(false)
+
+
+  useEffect(() => {
+    createTable();
+    setData();
+  }, []);
+
+  useEffect(() => {
+    console.log(diasEntrega)
+  }, [])
+
+
+
+  const createTable = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS"
+        + "Clientes "
+        + "(ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+        + "Nome TEXT, Sobrenome TEXT, Telefone TEXT,"
+        + "WhatsApp TEXT, Email TEXT, DiasEntrega TEXT"
+        + "PrefContato TEXT, TipoEstabelecimento TEXT EntregaRastreavel TEXT);"
+      )
+    })
+  }
+
+  const getData = () => {
+    try {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT  FROM Clientes",
+          [],
+          (tx, results) => {
+            var len = results.rows.length;
+            if (len > 0) {
+              navigation.navigate('Home')
+            }
+
+          }
+        )
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const setData = async () => {
+    if (nome.length == 0 || sobrenome.length == 0) {
+      /* Alert.alert('Warning!', "Please write your data.") */
+    } else {
+      try {
+        db.transaction(async (tx) => {
+          await tx.executeSql(
+            "INSERT INTO Clientes (Nome, Sobrenome, Telefone, WhatsApp,"
+            + "Email, DiasEntrega PrefContato, TipoEstabelecimento, EntregaRastreavel) VALUES (?,?,?,?,?,?,?,?,?)",
+            [nome, sobrenome, telefone, whatsApp, email, diasEntrega, contato, tipoEstabelecimento, isEnable]
+          );
+        })
+        navigation.navigate('Home');
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
 
   const onChangeNome = (textNome: React.SetStateAction<string>) => {
     setNome(textNome)
@@ -28,7 +106,7 @@ export function CadastroScreen({ navigation }) {
   const onChangeWhatsApp = (textWhatsApp: React.SetStateAction<string>) => {
     setWhatsApp(textWhatsApp)
   }
-  
+
   const onChangeEmail = (textEmail: React.SetStateAction<string>) => {
     setEmail(textEmail)
   }
@@ -43,25 +121,24 @@ export function CadastroScreen({ navigation }) {
 
   const img = './imgs/background.jpg'
 
-  const options = [{ text: 'Segunda-Feira', id: 1 },
-  { text: 'Terça-Feira', id: 2 },
-  { text: 'Quarta-Feira', id: 3 },
-  ]
-  const options2 = [{ text: 'Quinta-Feira', id: 4 },
-  { text: 'Sexta-Feira', id: 5 }
+  const dias = [{ text: 'Segunda-Feira', id: '1' },
+  { text: 'Terça-Feira', id: '2' },
+  { text: 'Quarta-Feira', id: '3' },
   ]
 
-  const contato = [{ text: 'WhatsApp', id: 6 },
-  { text: 'Fax', id: 7 }
+  const dias2 = [  { text: 'Quinta-Feira', id: 'Quinta-Feira' },
+  { text: 'Sexta-Feira', id: 'Sexta-feira' }
   ]
 
-  const contato2 = [{ text: 'E-mail', id: 8 },
-  { text: 'Telefonema', id: 9 }
+  const prefContato = [{ text: 'WhatsApp', id: 'WhatsApp' },
+  { text: 'Fax', id: 'Fax' },
+  { text: 'E-mail', id: 'Email' },
+  { text: 'Telefonema', id: 'Telefonema' }
   ]
 
 
-  const tipoEstabelecimento = [{ text: 'Residencial', id: 10 },
-  { text: 'Comercial', id: 11 }
+  const estabelecimento = [{ text: 'Residencial', id: 'Residencial' },
+  { text: 'Comercial', id: 'Comercial' }
   ]
 
   return (
@@ -105,17 +182,18 @@ export function CadastroScreen({ navigation }) {
 
           <Text style={styles.textCheck}>Dia que deseja receber a entrega</Text>
 
-          <CheckBox options={options} onChange={(op) => Alert.alert(op)} />
-          <CheckBox options={options2} onChange={(op) => Alert.alert(op)} />
+          <CheckBox options={dias} onChange={(op) => {
+            setDiasEntrega(op)}} 
+            multiple/>
+          <CheckBox options={dias2} onChange={(op) => setDiasEntrega(op)} multiple/>
 
           <Text style={styles.textCheck}>Preferencia de Contato</Text>
 
-          <CheckBox options={contato} onChange={(op) => Alert.alert(op)} />
-          <CheckBox options={contato2} onChange={(op) => Alert.alert(op)} />
+          <CheckBox options={prefContato} onChange={(op) => setContato(op)} />
 
           <Text style={styles.textCheck}>Tipo de Estabelecimento</Text>
 
-          <CheckCircle options={tipoEstabelecimento} onChange={(op) => Alert.alert(op)} />
+          <CheckCircle options={estabelecimento} onChange={(op) => setTipoEstabelecimento(op)} />
 
           <View style={{ flexDirection: 'row' }}>
 

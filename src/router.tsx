@@ -1,10 +1,10 @@
 import React from 'react'
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { HomeScreen } from './screens/HomeScreen'
+import  HomeScreen  from './screens/HomeScreen'
 import { SyncScreen } from './screens/SyncScreen'
-import { CadastroScreen } from './screens/CadastroScreen'
 import { ClienteScreen } from './screens/ClienteScreen'
+import CadastroScreen from './screens/CadastroScreen';
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
