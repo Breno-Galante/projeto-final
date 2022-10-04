@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, TextInput, Text, TouchableOpacity, Alert, ImageBackground, Switch, ScrollView, AsyncStorage, NativeModules } from "react-native";
 import styles from './Styles/StyleCadastro';
 import LinearGradient from "react-native-linear-gradient";
-import CheckBox, { CheckCircle } from "./Index";
+import CheckBox, { CheckCircle, CheckBoxDias } from "./Index";
 import SQLite from 'react-native-sqlite-storage';
 
 
@@ -56,7 +56,7 @@ export default function CadastroScreen({ navigation }) {
     try {
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT  FROM Clientes",
+          "SELECT * FROM Clientes",
           [],
           (tx, results) => {
             var len = results.rows.length;
@@ -84,6 +84,7 @@ export default function CadastroScreen({ navigation }) {
             [nome, sobrenome, telefone, whatsApp, email, diasEntrega, contato, tipoEstabelecimento, isEnable]
           );
         })
+        console.log(nome, sobrenome, telefone, whatsApp, email, diasEntrega, contato, tipoEstabelecimento, isEnable)
         navigation.navigate('Home');
       } catch (error) {
         console.log(error);
@@ -121,12 +122,10 @@ export default function CadastroScreen({ navigation }) {
 
   const img = './imgs/background.jpg'
 
-  const dias = [{ text: 'Segunda-Feira', id: '1' },
-  { text: 'Terça-Feira', id: '2' },
-  { text: 'Quarta-Feira', id: '3' },
-  ]
-
-  const dias2 = [  { text: 'Quinta-Feira', id: 'Quinta-Feira' },
+  const dias = [{ text: 'Segunda-Feira', id: 'Segunda-Feira' },
+  { text: 'Terça-Feira', id: 'Terça-Feira' },
+  { text: 'Quarta-Feira', id: 'Quarta-Feira' },
+  { text: 'Quinta-Feira', id: 'Quinta-Feira' },
   { text: 'Sexta-Feira', id: 'Sexta-feira' }
   ]
 
@@ -180,12 +179,12 @@ export default function CadastroScreen({ navigation }) {
 
 
 
-          <Text style={styles.textCheck}>Dia que deseja receber a entrega</Text>
+          <Text style={styles.textCheck1}>Dia que deseja receber a entrega</Text>
 
-          <CheckBox options={dias} onChange={(op) => {
+          <CheckBoxDias options={dias} onChange={(op) => {
+            console.log(op)
             setDiasEntrega(op)}} 
             multiple/>
-          <CheckBox options={dias2} onChange={(op) => setDiasEntrega(op)} multiple/>
 
           <Text style={styles.textCheck}>Preferencia de Contato</Text>
 
@@ -193,7 +192,7 @@ export default function CadastroScreen({ navigation }) {
 
           <Text style={styles.textCheck}>Tipo de Estabelecimento</Text>
 
-          <CheckCircle options={estabelecimento} onChange={(op) => setTipoEstabelecimento(op)} />
+          <CheckCircle options={estabelecimento} onChange={(op) => setTipoEstabelecimento(op)} multiple/>
 
           <View style={{ flexDirection: 'row' }}>
 
@@ -209,7 +208,7 @@ export default function CadastroScreen({ navigation }) {
 
           <LinearGradient colors={['#A62A5C', '#6A2597']} start={{ x: 1, y: 1 }}
             end={{ x: 0, y: 1 }} locations={[.2, 0.8]} style={styles.linearGradient} >
-            <TouchableOpacity onPress={() => cadastro()}>
+            <TouchableOpacity onPress={() => setData()}>
               <Text style={styles.textButton}>Cadastrar</Text>
             </TouchableOpacity>
           </LinearGradient>

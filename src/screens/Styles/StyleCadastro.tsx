@@ -43,9 +43,15 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#2e2e2e',
     },
+    textCheck1: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#2e2e2e',
+        marginBottom: -16,
+    },
     imgFundo: {
         flex: 1 ,
-        width:'100%',
+        width: '100%',
         resizeMode: 'cover',
         alignItems: 'center',
         justifyContent: 'space-evenly',
